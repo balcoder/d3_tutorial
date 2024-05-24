@@ -9,13 +9,39 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/style.css" />
-    <link rel="shortcut icon" type="image/png" href="img/favicon.png" />
+    <!-- <link rel="shortcut icon" type="image/png" href="img/favicon.png" /> -->
 
-    <title>Npm Scripts &mdash; Your all-in-one build tool</title>
+    <title>Life Expectancy vs. Births per Capita &mdash; Scatter Plot</title>
   </head>
   <body>
-    <h1>NPM Build Tool</h1>
-    <h3 id="foo"></h3>
+    <div>
+      <h2>Scatter Plot</h2>
+      <p>
+        Looks at the relationship between birthrate per capita and life
+        expectancy
+      </p>
+      <svg
+        id="life-expectancy"
+        version="1.1"
+        baseProfile="full"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+    </div>
+    <div>
+      <h2>Scatter Plot</h2>
+      <p>
+        Looks at the relationship between rate of cellular phone subscriptions
+        to level of literacy in adults, aged 15 and up.
+      </p>
+      <svg
+        id="literacy"
+        version="1.1"
+        baseProfile="full"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+    </div>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <!-- <script src="./js/birthData.js"></script> -->
     <script src="./main.js"></script>
   </body>
 </html>

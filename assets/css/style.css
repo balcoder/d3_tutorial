@@ -1,13 +1,24 @@
 body {
-  background-color: #879f7a;
-  font-size: 24px;
+  font-size: 18px;
 }
 
-#example {
-  padding: 10%;
+h2, p {
+  text-align: center;
 }
-#example .info {
-  margin: 20px;
+
+div {
+  margin-top: 40px;
+}
+
+svg {
+  margin: 0 auto;
+  display: block;
+  color: #62619a;
+}
+
+.tick line {
+  stroke: #b1aaaa;
+  stroke-dasharray: 10, 5;
 }
 
 /*# sourceMappingURL=style.css.map */

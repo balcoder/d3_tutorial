@@ -1,14 +1,158 @@
-$base-color: #879f7a;
-$border-dark: rgba($base-color, 0.08);
+// body {
+//     background-color: #e4e4e4;
+//   }
+  
+//   h1 {
+//     text-align: center;
+//   }
+  
+//   #notes, .preview {
+//     margin: 0 auto 16px;
+//     width: 75%;
+//   }
+
+//   .note, .preview {
+//     border-radius: 8px;
+//     padding: 10px;
+//   }
+  
+//   .note {
+//     background-color: #fdffb7;
+//     border: 8px solid #d4daa7;
+//     margin: 16px 0;
+//   }
+
+//   .preview {
+//     background-color: #ccedd0;
+//     border: 8px solid #4caf50;
+//     box-sizing: border-box;
+//   }
+
+//   .hide {
+//     display: none;
+//   }
+  
+//   form {
+//     text-align: center;
+//   }
+  
+//   input {
+//     width: 50%;
+//     border: none;
+//     border-radius: 5px;
+//   }
+  
+//   input,
+//   button {
+//     padding: 10px;
+//   }
+  
+//   button {
+//     background-color: #ff9494;
+//     border: none;
+//     border-radius: 5px;
+    
+//   }
+
+//   #remove {
+//     background-color: #fc3636;
+//   }
+
+//   #lucky {
+//     background-color: #54f266;
+//   }
+  
+//   button:hover {
+//     cursor: pointer;
+//     background-color: #fe2222;
+//   }
+  
+//   button:focus {
+//     outline: none;
+//   }
+
+//   #header {
+//     background-color: teal;
+//     padding-top: 50px;
+//     padding-bottom: 30px;
+//   }
+
+//   .result {
+//     font-weight: 600;
+//     text-align: center;
+//   }
+
+// body {
+//   margin: 0;
+//   text-align: center;
+// }
+
+// #header {
+//   padding: 40px;
+//   background-color: #5a0071;
+//   color: white;
+//   font-family: sans-serif;
+// }
+
+// form > input {
+//   width: 60%;
+//   padding: 8px;
+//   border-radius: 8px;
+//   border: none;
+// }
+
+// form > button {
+//   padding: 8px;
+//   border-radius: 8px;
+//   background-color: #d0d0f9;
+//   border: none;
+// }
+
+// form > button:hover {
+//   cursor: pointer;
+//   background-color: #6a6a8e;
+// }
+
+// #letters {
+//   margin: 20px auto 0;
+//   width: 800px;
+// }
+
+// .letter {
+//   display: inline-block;
+//   text-align: center;
+//   background-color: #ffc800;
+//   vertical-align: bottom;
+// }
+
+// .new {
+//   font-size: 1.5em;
+//   color: #ffffff;
+// }
+
+// svg, input {
+//   margin: 0 auto;
+//   display: block;
+// }
 
 body {
-    background-color: $base-color;
-    font-size: 24px;
+  font-size: 18px;
 }
-#example {
-    padding: 10%;
+h2, p {
+  text-align: center;
+}
 
-    .info {
-        margin: 20px;
-    }
+div {
+  margin-top: 40px;
+}
+
+svg {
+  margin: 0 auto;
+  display: block;
+  color: #62619a;  
+}
+
+.tick line {
+  stroke: #b1aaaa;
+  stroke-dasharray: 10,5;
 }
