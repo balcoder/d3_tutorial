@@ -114,14 +114,16 @@ function plotLiteracyGraph() {
     const parsedData = regionData.filter(d => objHasKeys(d));    
     
      //Use d3.extent to get min and max for domain
+    const xScale = d3.scaleLinear()
+    .domain(d3.extent(parsedData, d =>  d.adultLiteracyRate))
+    .range([padding, width - padding]);
+
     const yScale = d3.scaleLinear()
         .domain(d3.extent(parsedData, d => d.subscribersPer100))
         .range([height - padding, padding]);
 
     
-    const xScale = d3.scaleLinear()
-        .domain(d3.extent(parsedData, d =>  d.adultLiteracyRate))
-        .range([padding, width - padding]);
+    
     
     //make new axis passing in the xScale and yScale
     //use ticksize to make a grid(ticks stretch in direction of axis lable)
@@ -197,10 +199,280 @@ function plotLiteracyGraph() {
             .style("text-anchor", "middle")
             .style("font-size", "1.5em")
             .text("Cellular Subscriptions vs. Literacy Rate");
+}
 
+function plotBirtshHistogram() {
+    const width =  600;
+    const height = 500;
+    const barPadding = 1;
+    const padding = 20;
+
+    // get the min and max year 
+    const minYear = d3.min(birthData, d => d.year);
+    const maxYear = d3.max(birthData, d => d.year);    
+
+    // gather all the objects with that min year in an array
+    let yearData = birthData.filter(d => d.year === minYear);    
+    
+    const xScale = d3.scaleLinear()
+        .domain([0, d3.max(yearData, d => d.births)])
+        .rangeRound([padding, width - padding]);
+
+    //d3.histogram returns a function that creates bins from our values
+    // .domain specifies the domain of values to use generating the bins
+    //these values are specified by the .value(callback)
+    const histogram = d3.histogram()
+        .domain(xScale.domain())
+        .thresholds(xScale.ticks())
+        .value(d => d.births);
+    
+    // pass the data into the histogram generator and call it bins
+    let bins = histogram(yearData);   
+
+    
+    const yScale = d3.scaleLinear()
+        // from 0 to the length of largest bin
+        .domain([0, d3.max(bins, d => d.length)])
+        .range([height, 0]);
+    
+    //select the svg
+    let bars = d3.select("#births")
+        .attr("width", width)
+        .attr("height", height)
+      .selectAll(".bar")
+      .data(bins)
+      .enter()
+      .append("g")
+        .classed("bar", true)
+
+    bars
+        .append("rect")
+          .attr("x", (d, i) => xScale(d.x0))
+          .attr("y", d => yScale(d.length))
+          .attr("height", d => height - yScale(d.length))
+          .attr("width", d => xScale(d.x1) - xScale(d.x0)- barPadding) 
+          .attr("fill", "teal");
+    
+    bars
+        .append("text")
+          .text(d => `${d.x0}-${d.x1} (bar height: ${d.length})`)
+          .attr("transform", "rotate(-90)")
+          .attr("y", d => (xScale(d.x1) + xScale(d.x0)) / 2)
+          .attr("x", -height + 10)
+          .style("alignment-baseline", "middle");
+    
+
+    d3.select("#birthsInput")
+        .property("min", minYear)
+        .property("max", maxYear)        
+        .property("name", "birthsInput")
+        .property("value", minYear)
+        .on("input", function() {
+            let year = +d3.event.target.value;
+            console.log(year);            
+            // update the data, xScale, yScale and histgram from input
+            yearData = birthData.filter(d => d.year === year);
+            xScale.domain([0, d3.max(yearData, d => d.births)]);
+            histogram.domain(xScale.domain())
+                .thresholds(xScale.ticks());
+            bins = histogram(yearData);
+            yScale.domain([0, d3.max(bins, d => d.length)]);
+
+            bars = d3.select("#births")
+                .selectAll(".bar")
+                .data(bins);
+
+            // remove and elements in the exit selection
+            bars
+                .exit()
+                .remove();
+            // append a group for each enter selection
+            const g = bars
+                .enter()
+                .append("g")
+                  .classed("bar", true);
+            
+            g.append("rect");
+            g.append("text");
+
+            //merge enter selection with our update selection
+            g.merge(bars)
+                .select("rect")
+                .attr("x", (d, i) => xScale(d.x0))
+                .attr("y", d => yScale(d.length))
+                .attr("height", d => height - yScale(d.length))
+                .attr("width", d => {
+                    let width = xScale(d.x1) - xScale(d.x0)- barPadding;
+                    return width < 0 ? 0 : width;
+                }) 
+                .attr("fill", "teal");
+            
+            g.merge(bars)
+                .select("text")
+                .text(d => `${d.x0}-${d.x1} (bar height: ${d.length})`)
+                .attr("transform", "rotate(-90)")
+                .attr("y", d => (xScale(d.x1) + xScale(d.x0)) / 2)
+                .attr("x", -height + 10)
+                .style("alignment-baseline", "middle");
+        })
+
+
+}
+
+function plotMedianAge() {
+    const width =  600;
+    const height = 500;
+    const barPadding = 1;
+    const padding = 40;
+
+    // remove all regions with null median age
+    const parsedData = regionData.filter(d => d.medianAge);    
+   
+
+    //Use d3.extent to get min and max for domain
+    const xScale = d3.scaleLinear()
+    .domain(d3.extent(parsedData, d =>  d.medianAge))
+    .range([padding, width - padding]);
+
+    
+    
+     //d3.histogram returns a function that creates bins from our values
+    // .domain specifies the domain of values to use generating the bins
+    //these values are specified by the .value(callback)
+    const histogram = d3.histogram()
+        .domain(xScale.domain())
+        .thresholds(xScale.ticks())
+        .value(d => d.medianAge);
+    
+    // pass the data into the histogram generator and call it bins
+    let bins = histogram(parsedData);
+    
+
+    const yScale = d3.scaleLinear()
+        // from 0 to the length of largest bin
+        .domain([0, d3.max(bins, d => d.length)])
+        .range([height - padding, padding]);
+
+
+    //make new axis passing in the xScale and yScale
+    //use ticksize to make a grid(ticks stretch in direction of axis lable)
+    const xAxis = d3.axisBottom(xScale)
+        // .tickSize(-height + 2 * padding)
+        .tickSizeOuter(0);        
+
+    const yAxis = d3.axisLeft(yScale)
+        // .tickSize(-width + 2 * padding)
+        .tickSizeOuter(0);
+    
+    // Add the x-axis and y-axis to the svg
+    d3.select("#median-age")
+        .append("g")
+            .classed("x-axis", true)
+            .attr("transform", `translate(0, ${height})`)
+            .call(xAxis);
+
+    d3.select("#median-age")
+        .append("g")
+        .classed("y-axis", true)
+            .attr("transform", `translate(${padding}, 0)`)
+            .call(yAxis);
+
+    
+    //select the svg
+    let bars = d3.select("#median-age")
+        .attr("width", width + padding)
+        .attr("height", height + padding)    
+      .selectAll(".bar")
+      .data(bins)
+      .enter()
+      .append("g")
+        .classed("bar", true)
+
+    //select the input and add an event listener
+    d3.select("#medianInput")
+        .property("value", bins.length)
+      .on("input", function() {
+        let binCount = d3.event.target.value;
+        histogram.thresholds(xScale.ticks(binCount))
+        // update the bins variable and the y-scale
+        bins = histogram(parsedData)
+        yScale.domain([0, d3.max(bins, d => d.length)])
+        
+        d3.select(".y-axis")
+        .call(d3.axisLeft(yScale))
+
+        // d3.select(".x-axis")
+        //     .call(d3.axisBottom(xScale))
+        //         .ticks(binCount);
+
+        let rect = d3.select("#median-age")
+            .selectAll("rect")
+            .data(bins);
+
+        rect
+            .exit()
+            .remove();
+        
+        rect
+            .enter()
+                .append("rect")
+            .merge(rect)
+                .attr("x", (d, i) => xScale(d.x0))
+                .attr("y", d => yScale(d.length))
+                .attr("height", d => height - yScale(d.length))
+                .attr("width", d => {
+                    let width = xScale(d.x1) - xScale(d.x0)- barPadding;
+                    return width >= 0 ? width : 0; 
+                } ) 
+                .attr("fill", "teal");
+        
+        d3.select(".bin-count")
+            .text(`Number of bins: ${bins.length}`)
+      })
+
+    bars
+        .append("rect")
+          .attr("x", (d, i) => xScale(d.x0))
+          .attr("y", d => yScale(d.length))
+          .attr("height", d => height - yScale(d.length))
+          .attr("width", d => xScale(d.x1) - xScale(d.x0)- barPadding) 
+          .attr("fill", "teal");
+    
+    bars
+        .append("text")
+        //   .text(d => `${d.length} :regions`)
+          .attr("transform", "rotate(-90)")
+          .attr("y", d => (xScale(d.x1) + xScale(d.x0)) / 2)
+          .attr("x", -height + 10)
+          .style("alignment-baseline", "middle");
+    
+    // Add x-axis label
+    d3.select("#median-age")
+        .append("text")
+            .attr("x", width / 2)
+            .attr("y", height )
+            .attr("dy", "1.8em")
+            .style("text-anchor", "middle")
+            .text("Median Age");
+
+    // Add the y-axis label
+    d3.select("#median-age")
+        .append("text")
+            .attr("transform", "rotate(-90)")
+            .attr("x", - height / 2 )
+            .attr("y",  padding)
+            .attr("dy", "-1.2em")
+            .style("text-anchor", "middle")
+            .text("Number of Country Regions");
+    
+
+    
+    
 }
 lifeExpectancy();
 plotLiteracyGraph();
+plotBirtshHistogram();
+plotMedianAge();
 
 
 

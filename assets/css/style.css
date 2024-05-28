@@ -7,13 +7,18 @@ h2, p {
 }
 
 div {
-  margin-top: 40px;
+  margin: 40px 0;
 }
 
 svg {
   margin: 0 auto;
   display: block;
   color: #62619a;
+}
+
+#birthsInput, #medianInput {
+  margin: 2em auto;
+  display: block;
 }
 
 .tick line {
