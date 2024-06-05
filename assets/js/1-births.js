@@ -34,6 +34,11 @@ function lifeExpectancy() {
     const radiusScale = d3.scaleLinear()
         .domain(d3.extent(birthData2011, d => d.births))
         .range([2, 40]);
+    
+    // creater a div for our tooltip
+    const tooltip = d3.select("body")
+        .append("div")
+          .classed("tooltip", true); 
 
     // Select the svg with id of life-expectancy
     d3.select("#life-expectancy")
@@ -47,7 +52,11 @@ function lifeExpectancy() {
         .attr("cx", d =>  xScale(d.births / d.population))
         .attr("cy", d => yScale(d.lifeExpectancy))
         .attr("fill", d=> colorScale(d.population / d.area))
-        .attr("r", d => radiusScale(d.births));
+        .attr("r", d => radiusScale(d.births))
+        .on("mousemove", showTooltip)
+        .on("touchstart", showTooltip)        
+        .on("mouseout", hideTooltip)
+        .on("touchend", hideTooltip);
 
     // Add the x-axis and y-axis to the svg
     d3.select("svg")
@@ -88,6 +97,22 @@ function lifeExpectancy() {
             .style("text-anchor", "middle")
             .style("font-size", "1.5em")
             .text("Births by Country in 2011");
+    
+    function showTooltip(d) {        
+        tooltip
+            .style("opacity", 1)
+            .style("left", `${d3.event.x - tooltip.node().offsetWidth / 2}px`)
+            .style("top", `${d3.event.y -10}px`)
+            .html(`
+            <p>Region: ${d.region}</p>
+            <p>Births: ${d.births.toLocaleString()}</p>
+            <p>Populatio: ${d.population.toLocaleString()}</p>`)        
+    }
+
+    function hideTooltip() {
+        tooltip
+            . style("opacity", 0);
+    }
 }
 
 // Cellular Subscription vs. Literacy Rate -- Scatter Plot
@@ -332,8 +357,10 @@ function plotMedianAge() {
     //Use d3.extent to get min and max for domain
     const xScale = d3.scaleLinear()
     .domain(d3.extent(parsedData, d =>  d.medianAge))
-    .range([padding, width - padding]);
+    .rangeRound([padding, width - padding]);
 
+    // we can't set the yScale till we know how high the bins will be
+    // so we first use the histogram fn to set the bins
     
     
      //d3.histogram returns a function that creates bins from our values
@@ -398,12 +425,13 @@ function plotMedianAge() {
         bins = histogram(parsedData)
         yScale.domain([0, d3.max(bins, d => d.length)])
         
+        
         d3.select(".y-axis")
         .call(d3.axisLeft(yScale))
 
-        // d3.select(".x-axis")
-        //     .call(d3.axisBottom(xScale))
-        //         .ticks(binCount);
+        d3.select(".x-axis")
+            .call(d3.axisBottom(xScale)
+                .ticks(binCount));
 
         let rect = d3.select("#median-age")
             .selectAll("rect")
@@ -463,16 +491,223 @@ function plotMedianAge() {
             .attr("y",  padding)
             .attr("dy", "-1.2em")
             .style("text-anchor", "middle")
-            .text("Number of Country Regions");
-    
+            .text("Number of Country Regions");    
+}
+
+function plotPieBirths() {
+    // Pie Chart showing births per continent and change input
+    // between min and max year
+    const width = 600;
+    const height = 600;
+    const minYear = d3.min(birthDataPie, d => d.year);
+    const maxYear = d3.max(birthDataPie, d => d.year);
 
     
+    // get a list of continent names from the data set
+    const continents = birthDataPie.reduce((acc, cur) => {       
+        if (!acc.includes(cur.continent)) {
+            acc.push(cur.continent);
+        }
+        return acc;
+    }, []);    
+
+    // use d3.scaleOrdinal to create a color scale
+    const colorScale = d3.scaleOrdinal()
+        .domain(continents)
+        .range(d3.schemeCategory10);
     
+    // select the svg    
+    d3.select("#pieBirths")
+        .attr("width", width)
+        .attr("height", height)
+      .append('g')
+      // center the g in the middle of the svg
+        .attr("transform", `translate(${width / 2}, ${height / 2})`)
+        .classed("chart", true);
+    
+    
+    
+    // select the input and give min and max vlaues
+    d3.select("#pieBirthsInput")
+        .property("min", minYear)
+        .property("max", maxYear)
+        .property("value", minYear)
+        .on("input", function() {            
+            makeGraph(+d3.event.target.value)
+        });  
+    
+    
+    makeGraph(minYear);
+           
+    
+    // helper function to render graph on each update
+    function makeGraph(year) {
+        // get array of regions for that year
+        let yearData = birthDataPie.filter(d => d.year === year);
+        
+
+        let arcs = d3.pie()
+            .value(d => d.births)
+            (yearData);            
+        
+
+        let path = d3.arc()
+            .outerRadius(width / 2 - 10)
+            .innerRadius(width / 4)
+            .padAngle(0.02)
+            // .cornerRadius(20);
+
+        let update = d3.select(".chart")
+            .selectAll(".arc")
+            .data(arcs)
+        // remove any unnecessary arcs
+        update
+            .exit()
+            .remove();
+        
+        update
+            .enter()
+            .append("path")
+                .classed("arc", true)
+            .merge(update)
+                .attr("fill", d => colorScale(d.data.continent))
+                .attr("stroke", "black")
+                .attr("d", path);
+    }
 }
+
+function plotBirthsPerMonth() {
+    const width = 600;
+    const height = 600;
+    const minYear = d3.min(birthDataMonths, d => d.year);
+    const maxYear = d3.max(birthDataMonths, d => d.year);
+
+    // get a list of months from the data set
+    const months = birthDataMonths.reduce((acc, cur) => {       
+    if (!acc.includes(cur.month)) {
+        acc.push(cur.month);
+    }
+    return acc;
+    }, []);
+    
+    
+    const colorScale = d3.scaleOrdinal()
+        .domain(months)
+        .range(d3.schemeCategory20);
+    
+    const quarterColors = ["#1f77b4", "#2ca02c", "#d62728", "#ff7f0e"]
+    
+    let svg = d3.select("#pie-births-per-month")
+        .attr("width", width)
+        .attr("height", height)
+    
+    svg
+      .append("g")
+        // center the g in the middle of the svg
+        .attr("transform", `translate(${width / 2}, ${height / 2})`)
+        .classed("births-per-month", true);
+    
+    // add new group for the quarter
+    svg
+        .append("g")
+          .attr("transform", `translate(${width / 2}, ${height / 2})`)
+          .classed("inner-chart", true);
+    
+    /// add title
+    svg
+        .append("text")
+            .classed("births-per-month-title", true)
+            .attr("x", width / 2)
+            .attr("y", 30)
+            .style("font-size", "2em")
+            .style("text-anchor", "middle")
+
+    // select the input and give min and max vlaues
+    d3.select("#births-months-input")
+        .property("min", minYear)
+        .property("max", maxYear)
+        .property("value", minYear)
+        .on("input", function() {            
+            drawGraph(+d3.event.target.value)
+        });   
+   
+    drawGraph(minYear)
+
+
+    // helper function to render graph on each update
+    function drawGraph(year) {
+        // get array of months for that year
+        let yearData = birthDataMonths.filter(d => d.year === year);       
+        
+        let arcs = d3.pie()
+            .value(d => d.births)
+            .sort((a, b) => months.indexOf(a.month) - months.indexOf(b.month));
+            // (yearData);
+        let innerArcs = d3.pie()
+            .value(d => d.births)
+            .sort((a, b) => a.quarter -b.quarter);       
+
+        let path = d3.arc()
+            .outerRadius(width / 2 - 40)
+            .innerRadius(width / 4)
+            .padAngle(0.02);
+            
+        let innerPath = d3.arc()
+            .outerRadius(width / 4)
+            .innerRadius(0)
+            .padAngle(0.02);
+
+        let inner = d3.select(".inner-chart")
+            .selectAll(".inner-arc")
+            .data(innerArcs(getDataByQuarter(yearData)))
+        
+
+        let update = d3.select(".births-per-month")
+            .selectAll(".arc")
+            .data(arcs(yearData))
+
+        // no need to update exit as there are always 12 arcs
+        // update
+        //     .exit()
+        //     .remove();
+        inner
+            .enter()
+            .append("path")
+              .classed("inner-arc", true)
+              .attr("fill", (d, i) => quarterColors[i])
+            .merge(inner)
+              .attr("d", innerPath)        
+        update
+            .enter()
+            .append("path")
+                .classed("arc", true)                
+            .merge(update)
+                .attr("fill", d => colorScale(d.data.month))
+                .attr("stroke", "black")
+                .attr("d", path);
+        
+        d3.select(".births-per-month-title")
+            .text("Births by months for " + year)
+    }
+
+    function getDataByQuarter(data) {
+        let quarterTallies = [0, 1, 2, 3].map(n => ({quarter: n, births: 0}));
+        for(let i = 1; i < data.length; i++) {
+            let row = data[i]
+            // check which quarter it belongs to
+            let quarter = Math.floor(months.indexOf(row.month) / 3)
+            quarterTallies[quarter].births += row.births;
+        }
+        return quarterTallies;
+    }
+}
+
 lifeExpectancy();
 plotLiteracyGraph();
 plotBirtshHistogram();
 plotMedianAge();
+plotPieBirths();
+plotBirthsPerMonth();
 
 
 

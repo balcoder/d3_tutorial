@@ -56,7 +56,7 @@
     </div>
     <hr />
     <div>
-      <h2>Histogram</h2>
+      <h2>Histogram 2</h2>
       <p>
         Looks at the relationship between number of country regions and medium
         age.
@@ -67,7 +67,7 @@
         baseProfile="full"
         xmlns="http://www.w3.org/2000/svg"
       ></svg>
-      <p class="bin-count"></p>
+      <p id="year"></p>
       <input
         type="range"
         id="medianInput"
@@ -78,8 +78,50 @@
       />
     </div>
     <hr />
+    <div>
+      <h2>Pie Chart Births</h2>
+      <p>Pie Chart showing births per continent by year.</p>
+      <svg
+        id="pieBirths"
+        version="1.1"
+        baseProfile="full"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+      <p class="bin-count"></p>
+      <input
+        type="range"
+        id="pieBirthsInput"
+        name="pieBirthsInput"
+        min="1"
+        max="50"
+        step="1"
+      />
+    </div>
+    <hr />
+    <div>
+      <h2>Pie Chart Births per Month</h2>
+      <p>
+        Looks at the relationship between number of births and Month of the
+        Year.
+      </p>
+      <svg
+        id="pie-births-per-month"
+        version="1.1"
+        baseProfile="full"
+        xmlns="http://www.w3.org/2000/svg"
+      ></svg>
+      <p class="bin-count"></p>
+      <input
+        type="range"
+        id="births-months-input"
+        name="births-months-input"
+        min="1"
+        max="50"
+        step="1"
+      />
+    </div>
+    <hr />
     <script src="https://d3js.org/d3.v4.js"></script>
-    <!-- <script src="./js/birthData.js"></script> -->
     <script src="./main.js"></script>
   </body>
 </html>
