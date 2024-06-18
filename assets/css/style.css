@@ -63,7 +63,7 @@ input {
   position: absolute;
   border: 8px solid transparent;
   border-bottom-color: #ff0044;
-  bottom: -25px;
+  top: -15px;
   left: 50%;
   margin-left: -4px;
 }
@@ -76,6 +76,16 @@ input {
   top: -25px;
   left: 50%;
   margin-left: -6px;
+}
+
+.world-map-svg, #world-select {
+  margin: 10px auto;
+  display: block;
+}
+
+.world-map-svg path {
+  stroke: #212020;
+  stroke-width: 0.25px;
 }
 
 /*# sourceMappingURL=style.css.map */

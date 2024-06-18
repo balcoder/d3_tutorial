@@ -38021,7 +38021,7 @@ function d3QueueDemo() {
                 return country;
             });
             
-            d3.select("#foo")             
+            d3.select("#city-population")             
               .append("h2")
               .text("Countries & % population in each city");
             
@@ -38054,16 +38054,14 @@ function plotMethane() {
       .awaitAll(function(error, data) {
         if(error) throw error;
         
-        const yearObj =  formatAllData(data);
-        console.log(yearObj);
+        const yearObj =  formatAllData(data);      
 
         const width = 700;
         const height = 700;
         const padding = 100;
-        const yearRange = d3.extent(Object.keys(yearObj).map(year => +year));
-        console.log(yearRange);
+        const yearRange = d3.extent(Object.keys(yearObj).map(year => +year));        
             
-        var svg = d3.select('#scatter-methane-chart')
+        const svg = d3.select('#scatter-methane-chart')
         .attr('width', width)
         .attr('height', height);
 
@@ -38161,7 +38159,8 @@ function plotMethane() {
         }
 
         function showTooltip(d) {
-        let tooltip = d3.select('.tooltip');
+        var tooltip = d3.select('.methane-tooltip');
+        console.log("Tip")
         tooltip
         .style('opacity', 1)
         .style('left', ( d3.event.pageX - tooltip.node().offsetWidth / 2 ) + 'px' )
@@ -38176,7 +38175,7 @@ function plotMethane() {
         }
 
         function hideTooltip(d) {
-        d3.select('.tooltip')
+        d3.select('.methane-tooltip')
         .style('opacity', 0);
         }
             
@@ -38288,6 +38287,88 @@ function plotMethane() {
         }
 }
 
+function worldMapPopulation() {
+    d3.queue()
+      .defer(d3.json, '../world_50m.json')
+      .defer(d3.csv, '../country_data.csv', function(row) {
+       
+        return {
+            country: row.country,
+            countryCode: row.countryCode,
+            population: +row.population,
+            medianAge: +row.medianAge,
+            fertilityRate: +row.fertilityRate,
+            populationDensity: +row.population / +row.landArea
+        }
+      })
+      .await(function(error, mapData, populationData) {
+            if (error)  throw error;
+            
+            // convert map data into valid geojson format 
+            var geoData = topojson.feature(mapData, mapData.objects.
+                countries).features;
+            // geoData properties obj is empty so find matching population
+            // data using county code id and combine the two sets
+            populationData.forEach(row => {               
+                var countries = geoData.filter(d => d.id === row.countryCode);                
+                countries.forEach(country => country.properties = row);
+            }) 
+            const width = 960;
+            const height = 600;
+
+            // as world is on a globe we need to use a projection
+            const projection = d3.geoMercator()
+                                .scale(125)
+                                .translate([width / 2, height / 1.4]);
+
+            const path = d3.geoPath()
+                           .projection(projection);
+                           
+        
+
+            d3.select("#world-map-svg")
+                .attr("width", width)
+                .attr("height", height)
+              .selectAll(".country")
+              .data(geoData)
+              .enter() 
+                .append("path")
+                .classed("country", true)
+                .attr("d", path); 
+            
+            let select = d3.select("#world-select")
+
+            select.on("change", d => setColor(d3.event.target.value));
+
+            setColor(select.property("value"));
+
+            function setColor(val) {
+
+                const colorRanges = {
+                    population: ["white", "purple"],
+                    populationDensity: ["white", "red"],
+                    medianAge: ["white", "black"],
+                    fertilityRate: ["black", "orange"]
+                }
+    
+                const scale = d3.scaleLinear()
+                                .domain([0, d3.max(populationData, d => d[val])])
+                                .range(colorRanges[val]);
+
+                d3.selectAll(".country")
+                    .transition()
+                    .duration(700)
+                    .ease(d3.easeBackIn)
+                    .attr("fill", d =>{ 
+                        let data = d.properties[val];
+                        return data ? scale(data) : "#ccc"; 
+                    });
+            }
+      })
+}
+
+
+
 lifeExpectancy();
 plotLiteracyGraph();
 plotBirtshHistogram();
@@ -38295,6 +38376,7 @@ plotMedianAge();
 plotPieBirths();
 plotBirthsPerMonth();
 plotMethane();
+worldMapPopulation();
 d3QueueDemo();
 
 

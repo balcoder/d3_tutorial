@@ -121,7 +121,7 @@
       />
     </div>
     <hr />
-    <hr />
+
     <div>
       <h2>Scatter Plot of Methane vs Co2</h2>
 
@@ -138,8 +138,24 @@
       />
       <div class="methane-tooltip"></div>
     </div>
-    <h2 id="foo"></h2>
+    <hr />
+    <h2>World Map by Population</h2>
+    <svg
+      id="world-map-svg"
+      version="1.1"
+      baseProfile="full"
+      xmlns="http://www.w3.org/2000/svg"
+    ></svg>
+    <select id="world-select">
+      <option value="population">Population</option>
+      <option value="populationDensity">Population Density</option>
+      <option value="medianAge">Median Age</option>
+      <option value="fertilityRate">Fertitlty Rate</option>
+    </select>
+    <hr />
+    <h2 id="city-population"></h2>
     <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
     <script src="./main.js"></script>
   </body>
 </html>
